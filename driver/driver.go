@@ -7,6 +7,7 @@ import (
     "os"
     "strconv"
     "sync"
+    "time"
 )
 
 func hub(sendChans []chan rcft.Event,
@@ -36,6 +37,8 @@ func main() {
     defer wg.Wait()
 
     fmt.Print("Initialization...")
+
+    rand.Seed(time.Now().UnixNano())
 
     for i := 0; i < n; i++ {
         replicas = append(replicas, rcft.NewReplica(rand.Intn(2)))
