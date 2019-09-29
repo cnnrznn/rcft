@@ -14,10 +14,10 @@ func hub(sendChans []chan rcft.Event,
     for {
         select {
         case e := <-recvChan:
-            fmt.Println(e)
+            //fmt.Println(e)
             sendChans[e.Pid] <- e
         default:
-            fmt.Println("Spinning")
+            //fmt.Println("Spinning")
         }
     }
 }
@@ -33,6 +33,7 @@ func main() {
 
     var wg sync.WaitGroup
     wg.Add(n)
+    defer wg.Wait()
 
     fmt.Print("Initialization...")
 
@@ -48,7 +49,5 @@ func main() {
     }
 
     go hub(toreps, fromreps)
-
-    wg.Wait()
 }
 
