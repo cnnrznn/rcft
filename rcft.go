@@ -33,7 +33,7 @@ func (r Replica) String() string {
                             r.message_count)
 }
 
-func new_replica(value int) Replica {
+func NewReplica(value int) Replica {
     return Replica { value : value,
                      cardinality : 1,
                      phaseno : 0,
