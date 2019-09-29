@@ -5,7 +5,7 @@ The paper can be found ![https://zoo.cs.yale.edu/classes/cs426/2013/bib/bracha85
 
 
 ## Citations
-@inproceedings{ben1983another,
+[1] @inproceedings{ben1983another,
   title={Another advantage of free choice (extended abstract): Completely asynchronous agreement protocols},
   author={Ben-Or, Michael},
   booktitle={Proceedings of the second annual ACM symposium on Principles of distributed computing},
