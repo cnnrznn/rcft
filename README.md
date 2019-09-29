@@ -1,7 +1,7 @@
 # rcft
 Go implementation of Bracha's CFT randomized protocol
 
-The paper can be found ![https://zoo.cs.yale.edu/classes/cs426/2013/bib/bracha85asynchronous.pdf](here) or at [1]
+The paper can be found ![here](https://zoo.cs.yale.edu/classes/cs426/2013/bib/bracha85asynchronous.pdf) or at [1]
 
 
 ## Citations
