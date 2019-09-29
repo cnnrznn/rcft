@@ -3,6 +3,7 @@ package rcft
 import (
     "fmt"
     "github.com/cnnrznn/util"
+    "sync"
 )
 
 type Replica struct {
@@ -20,12 +21,16 @@ type Message struct {
 }
 
 type Event struct {
-    p int
+    Pid int
     m Message
 }
 
+func (e Event) String() string {
+    return fmt.Sprintf("%v, {%v}", e.Pid, e.m)
+}
+
 func (r Replica) String() string {
-    return fmt.Sprintf("%v, %v, %v\n%v\n%v",
+    return fmt.Sprintf("v:%v, c:%v, p:%v, ws:%v, ms:%v",
                             r.value,
                             r.cardinality,
                             r.phaseno,
@@ -41,7 +46,9 @@ func NewReplica(value int) Replica {
                      message_count : [2]int{} }
 }
 
-func (r Replica) Consensus(n, f int, ch chan Event) (decision int) {
+func (r Replica) Consensus(n, f int, sendChan, recvChan chan Event, wg *sync.WaitGroup) (decision int) {
+    defer wg.Done()
+
     decision = 0
 
     for r.witness_count[0] <= f && r.witness_count[1] <= f {
@@ -53,11 +60,11 @@ func (r Replica) Consensus(n, f int, ch chan Event) (decision int) {
                            phaseno : r.phaseno }
 
         for i := 0; i < n; i++ {
-            ch <- Event {i, sendm}
+            sendChan <- Event {i, sendm}
         }
 
         for util.Sum(r.message_count[:]) < n - f {
-            e := <-ch
+            e := <-recvChan
             msg := e.m
             if msg.phaseno == r.phaseno {
                 r.message_count[msg.value]++
@@ -65,7 +72,7 @@ func (r Replica) Consensus(n, f int, ch chan Event) (decision int) {
                     r.witness_count[msg.value]++
                 }
             } else {
-                ch <- e
+                sendChan <- e
             }
         }
 
@@ -90,15 +97,17 @@ func (r Replica) Consensus(n, f int, ch chan Event) (decision int) {
     }
 
     for i := 0; i < n; i++ {
-        ch <- Event { i,
+        sendChan <- Event { i,
                       Message { value : r.value,
                                 cardinality : n - f,
                                 phaseno : r.phaseno } }
-        ch <- Event { i,
+        sendChan <- Event { i,
                       Message { value : r.value,
                                 cardinality : n - f,
                                 phaseno : r.phaseno + 1 } }
     }
+
+    fmt.Println("Decided: ", decision)
 
     return
 }
