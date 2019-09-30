@@ -12,7 +12,8 @@ import (
 )
 
 func hub(sendChans []chan rcft.Event,
-         recvChan chan rcft.Event) {
+         recvChan chan rcft.Event,
+         delay int) {
     buffer := list.New()
 
     for {
@@ -20,7 +21,7 @@ func hub(sendChans []chan rcft.Event,
         case e := <-recvChan:
             buffer.PushBack(e)
         default:
-            time.Sleep(100 * time.Millisecond)
+            time.Sleep(time.Duration(delay) * time.Millisecond)
             for buffer.Len() > 0 {
                 e := buffer.Front().Value.(rcft.Event)
                 sendChans[e.Pid] <- e
@@ -30,7 +31,7 @@ func hub(sendChans []chan rcft.Event,
     }
 }
 
-func instance(n, f, log_position int) {
+func instance(n, f, delay int) {
     replicas := []rcft.Replica{}
     toreps := []chan rcft.Event{}
     fromreps := make(chan rcft.Event, 1024)
@@ -54,16 +55,17 @@ func instance(n, f, log_position int) {
         go r.Consensus(n, f, fromreps, toreps[i], &wg)
     }
 
-    go hub(toreps, fromreps)
+    go hub(toreps, fromreps, delay)
 }
 
 func main() {
     args := os.Args[1:]
     n, _ := strconv.Atoi(args[0])
     f, _ := strconv.Atoi(args[1])
+    delay, _ := strconv.Atoi(args[2])
 
     for l:=0; ; l++ {
-        instance(n, f, l)
+        instance(n, f, delay)
     }
 }
 
