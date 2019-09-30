@@ -26,7 +26,7 @@ type Event struct {
 }
 
 func (e Event) String() string {
-    return fmt.Sprintf("%v, {%v}", e.Pid, e.m)
+    return fmt.Sprintf("%v, %v", e.Pid, e.m)
 }
 
 func (r Replica) String() string {
@@ -71,7 +71,7 @@ func (r Replica) Consensus(n, f int, sendChan, recvChan chan Event, wg *sync.Wai
                 if msg.cardinality > n/2 {
                     r.witness_count[msg.value]++
                 }
-            } else {
+            } else if msg.phaseno > r.phaseno {
                 sendChan <- e
             }
         }
