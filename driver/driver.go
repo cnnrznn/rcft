@@ -1,6 +1,7 @@
 package main
 
 import (
+    "container/list"
     "fmt"
     "github.com/cnnrznn/rcft"
     "math/rand"
@@ -12,13 +13,19 @@ import (
 
 func hub(sendChans []chan rcft.Event,
          recvChan chan rcft.Event) {
+    buffer := list.New()
+
     for {
         select {
         case e := <-recvChan:
-            fmt.Println(e)
-            sendChans[e.Pid] <- e
+            buffer.PushBack(e)
         default:
-            //fmt.Println("Spinning")
+            time.Sleep(100 * time.Millisecond)
+            for buffer.Len() > 0 {
+                e := buffer.Front().Value.(rcft.Event)
+                sendChans[e.Pid] <- e
+                buffer.Remove(buffer.Front())
+            }
         }
     }
 }
