@@ -2,19 +2,36 @@ package rcft
 
 import (
     "fmt"
+    "github.com/cnnrznn/dsdriver"
+    "math/rand"
+    "sync"
     "testing"
+    "time"
 )
 
 func TestReplicaInit(t *testing.T) {
-    r := new_replica(0)
+    r := NewReplica(0)
     fmt.Println(r)
 }
 
 func TestReplicaConsensus(t *testing.T) {
-    r := new_replica(0)
-    fmt.Println(r)
+    n := 7
+    f := 3
+    replicas := make([]Replica, n)
 
-    ch := make(chan Event)
+    rand.Seed(time.Now().UnixNano())
 
-    r.Consensus(9, 4, ch)
+    for i := range replicas {
+        replicas[i] = NewReplica(rand.Intn(2))
+    }
+
+    fr, tos := dsdriver.Local(n)
+
+    var wg sync.WaitGroup
+    wg.Add(n)
+    defer wg.Wait()
+
+    for i, r := range replicas {
+        go r.Consensus(n, f, fr, tos[i], &wg)
+    }
 }

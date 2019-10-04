@@ -2,6 +2,7 @@ package rcft
 
 import (
     "fmt"
+    "github.com/cnnrznn/dsdriver"
     "github.com/cnnrznn/util"
     "sync"
 )
@@ -25,6 +26,10 @@ type Event struct {
     m Message
 }
 
+func (e Event) Dest() int {
+    return e.Pid
+}
+
 func (e Event) String() string {
     return fmt.Sprintf("%v, %v", e.Pid, e.m)
 }
@@ -46,10 +51,10 @@ func NewReplica(value int) Replica {
                      message_count : [2]int{} }
 }
 
-func (r Replica) Consensus(n, f int, sendChan, recvChan chan Event, wg *sync.WaitGroup) (decision int) {
+func (r Replica) Consensus(n, f int, sendChan, recvChan chan dsdriver.Dester, wg *sync.WaitGroup) {
     defer wg.Done()
 
-    decision = 0
+    decision := 0
 
     for r.witness_count[0] <= f && r.witness_count[1] <= f {
         r.message_count = [2]int{}
@@ -64,7 +69,8 @@ func (r Replica) Consensus(n, f int, sendChan, recvChan chan Event, wg *sync.Wai
         }
 
         for util.Sum(r.message_count[:]) < n - f {
-            e := <-recvChan
+            d := <-recvChan
+            e := d.(Event)
             msg := e.m
             if msg.phaseno == r.phaseno {
                 r.message_count[msg.value]++
@@ -108,7 +114,5 @@ func (r Replica) Consensus(n, f int, sendChan, recvChan chan Event, wg *sync.Wai
     }
 
     fmt.Println("Decided: ", decision)
-
-    return
 }
 
