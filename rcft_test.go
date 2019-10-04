@@ -15,8 +15,8 @@ func TestReplicaInit(t *testing.T) {
 }
 
 func TestReplicaConsensus(t *testing.T) {
-    n := 7
-    f := 3
+    n := 101
+    f := 50
     replicas := make([]Replica, n)
 
     rand.Seed(time.Now().UnixNano())
