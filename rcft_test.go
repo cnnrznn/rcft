@@ -25,7 +25,7 @@ func TestReplicaConsensus(t *testing.T) {
         replicas[i] = NewReplica(rand.Intn(2))
     }
 
-    fr, tos := dsdriver.Local(n)
+    fr, tos := dsdriver.Local(n, dsdriver.ReorderHub)
 
     var wg sync.WaitGroup
     wg.Add(n)
